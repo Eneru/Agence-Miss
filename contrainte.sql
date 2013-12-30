@@ -30,7 +30,7 @@ before insert or update on utilisateur
 for each row
 when(not regexp_like(new.login,'^[:alpha:]{1}[:alnum:]{1,}$'))
 BEGIN
-  --Si le login est invalide
+  --Si le login est invalide on soulève une erreur
   RAISE_APPLICATION_ERROR(-20204,'Le login est invalide ; Il doit d''abord contenir une lettre puis une suite de chiffres ou de lettres');
 END;
 /
@@ -43,9 +43,21 @@ before insert or update on utilisateur
 for each row
 when(not regexp_like(new.courriel,'^[:alnum:]{1,}@[:alpha:]{1,}\.{1}[:alpha:]{2,}$');
 BEGIN
-  --Si l'adresse est invalide
+  --Si l'adresse est invalide on soulève une erreur
   RAISE_APPLICATION_ERROR(-20205,'L''adresse courriel est invalide ; Elle doit etre du type nom@serveur.pays');
 END;
 /
 
 ALTER TRIGGER courriel_invalide ENABLE;
+
+--Hachage du mot de passe
+create or replace trigger hachage_mdp
+before insert or update on utilisateur
+for each row
+BEGIN
+  --Hachage du mdp
+  :new.mdp := DBMS_OBFUSCATION_TOOLKIT.MD5(input_string => :new.mdp);
+END;
+/
+
+ALTER TRIGGER hachage_mdp ENABLE;
