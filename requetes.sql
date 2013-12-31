@@ -10,5 +10,3 @@ where 5 <= (select count(*)
             where us.idUtilisateur = usBis.idUtilisateur);
             
 --Pour chaque ville, le nombre de biens immobilier en location, le nombre de biens immobilier en vente et le nombre de clients cherchant un bien dans cette ville
-
-

@@ -1,3 +1,55 @@
+--Erreur sur la date de naissance
+create or replace trigger birthUser
+before insert or update on UTILISATEUR
+for each row
+when (sysdate < new.dateNaissance)
+BEGIN
+	-- soulever une exception
+	RAISE_APPLICATION_ERROR(-20200,'La date de naissance doit etre inferieure a la date du jour');
+END;
+/
+
+ALTER TRIGGER birthUser ENABLE;
+
+--Erreur sur la réservation du créneau
+create or replace trigger reserveCreneau
+before insert or update on RESERVATION_CRENEAU
+for each row
+when (sysdate > new.dateR)
+BEGIN
+	-- soulever une exception
+	RAISE_APPLICATION_ERROR(-20201,'La date de reservation de creneau doit etre supérieure a la date du jour');
+END;
+/
+
+ALTER TRIGGER reserveCreneau ENABLE;
+
+--Erreur sur la date de location
+create or replace trigger dateLocation
+before insert or update on HISTORIQUE_LOCATION
+for each row
+when (sysdate < new.dateL)
+BEGIN
+	-- soulever une exception
+	RAISE_APPLICATION_ERROR(-20202,'La date de location doit etre inferieur a la date du jour');
+END;
+/
+
+ALTER TRIGGER dateLocation ENABLE;
+
+--Erreur sur la date de vente
+create or replace trigger dateVente
+before insert or update on HISTORIQUE_VENTE
+for each row
+when (sysdate < new.dateV)
+BEGIN
+	-- soulever une exception
+	RAISE_APPLICATION_ERROR(-20203,'La date de vente doit etre inferieure a la date du jour');
+END;
+/
+
+ALTER TRIGGER dateVente ENABLE;
+
 --Modification des ajouts nom de client invalide
 create or replace trigger nom_invalide
 before insert or update on utilisateur

@@ -68,7 +68,18 @@ END;
 --Diminution du prix de 2%
 create or replace procedure diminution_2pourcents
 is
-  
+  prixUpdated vente.prixCourant%type;
+
+BEGIN
+  select prixCourant
+  into prixUpdated
+  from vente;
+
+  update vente
+  set prixCourant=2.*prixUpdated/100
+  where prixCourant*2./100 > prixInitial*marge/100;
+END;
+/
 
 --Diminution du prix mensuellement de 2%
 create or replace procedure diminution_mensuel
@@ -78,7 +89,7 @@ BEGIN
     job_name        => 'diminution',
     job_type        => 'PLSQL_BLOCK',
     job_action      => 'BEGIN diminution_2pourcents; END;',
-    start_date      => SYSTIMESTAMP
+    start_date      => SYSTIMESTAMP,
     repeat_interval => 'freq=monthly; bymonth=1,2,3,4,5,6,7,8,9,10,11,12; bymonthday=1;',
     end_date        => NULL,
     enabled         => TRUE,
@@ -95,4 +106,4 @@ DegToRad number := 57.29577951;
 BEGIN
   return(NVL(Radius,0) * ACOS((sin(NVL(Lat1,0) / DegToRad) * SIN(NVL(Lat2,0) / DegToRad)) + (COS(NVL(Lat1,0) / DegToRad) * COS(NVL(Lat2,0) / DegToRad) * COS(NVL(Lon2,0) / DegToRad - NVL(Lon1,0)/ DegToRad))));
 END;
-  
+/

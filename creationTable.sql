@@ -155,11 +155,12 @@ create table VENTE
 (
 	idVente integer primary key,
 	idBien integer not null,
-	prix float not null,
-	marge float not null,
+	prixInitial float not null,
+  prixCourant float default vente.prixInitial,
+	marge float not null,--La marge étant un pourcentage
 	fraisAgence float not null,
 	foreign key (idBien) references BIEN_IMMOBILIER,
-	CHECK (prix > 0.
+	CHECK (prixInitial > 0.
 		AND marge >= 0.
 		AND fraisAgence >= 0.03*prix
 		AND fraisAgence <= 0.10*prix)
@@ -200,56 +201,3 @@ create table HISTORIQUE_VENTE
 		AND fraisAgence >= 0.03*prix
 		AND fraisAgence <= 0.10*prix)
 );
-
---Erreur sur la date de naissance
-create or replace trigger birthUser
-before insert or update on UTILISATEUR
-for each row
-when (sysdate < new.dateNaissance)
-BEGIN
-	-- soulever une exception
-	RAISE_APPLICATION_ERROR(-20200,'La date de naissance doit etre inferieure a la date du jour');
-END;
-/
-
-ALTER TRIGGER birthUser ENABLE;
-
---Erreur sur la réservation du créneau
-create or replace trigger reserveCreneau
-before insert or update on RESERVATION_CRENEAU
-for each row
-when (sysdate > new.dateR)
-BEGIN
-	-- soulever une exception
-	RAISE_APPLICATION_ERROR(-20201,'La date de reservation de creneau doit etre supérieure a la date du jour');
-END;
-/
-
-ALTER TRIGGER reserveCreneau ENABLE;
-
---Erreur sur la date de location
-create or replace trigger dateLocation
-before insert or update on HISTORIQUE_LOCATION
-for each row
-when (sysdate < new.dateL)
-BEGIN
-	-- soulever une exception
-	RAISE_APPLICATION_ERROR(-20202,'La date de location doit etre inferieur a la date du jour');
-END;
-/
-
-ALTER TRIGGER dateLocation ENABLE;
-
---Erreur sur la date de vente
-create or replace trigger dateVente
-before insert or update on HISTORIQUE_VENTE
-for each row
-when (sysdate < new.dateV)
-BEGIN
-	-- soulever une exception
-	RAISE_APPLICATION_ERROR(-20203,'La date de vente doit etre inferieure a la date du jour');
-END;
-/
-
-ALTER TRIGGER dateVente ENABLE;
-
