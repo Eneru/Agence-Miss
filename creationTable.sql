@@ -164,7 +164,7 @@ create table VENTE
     foreign key (idBien) references BIEN_IMMOBILIER,
     CHECK (prixInitial >= prixCourant
         AND marge >= 0.
-        AND prixCourant >= prixCourant - marge
+        AND prixCourant >= prixInitial - marge
         AND fraisAgence >= 0.03
         AND fraisAgence <= 0.10)
 );

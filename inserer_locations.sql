@@ -3,5 +3,6 @@ insert into location values (
     7,
     1000,
     200,
-    1000
+    1000,
+    to_date('01-12-2013', 'DD-MM-YYYY')
 );
