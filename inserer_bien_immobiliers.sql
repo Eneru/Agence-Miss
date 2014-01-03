@@ -9,9 +9,10 @@ insert into bien_immobilier values (
     131,
     1,
     1,
-    'a',
+    NULL,
     'Robertsau',
-    'maison'
+    'maison',
+    to_date('10-09-2013', 'DD-MM-YYYY')
 );
 
 insert into bien_immobilier values (
@@ -25,9 +26,10 @@ insert into bien_immobilier values (
     131,
     1,
     1,
-    'b',
+    NULL,
     'Robertsau',
-    'maison'
+    'maison',
+    to_date('10-09-2013', 'DD-MM-YYYY')
 );
 
 insert into bien_immobilier values (
@@ -41,9 +43,10 @@ insert into bien_immobilier values (
     131,
     1,
     1,
-    'c',
+    NULL,
     'Robertsau',
-    'maison'
+    'maison',
+    to_date('10-09-2013', 'DD-MM-YYYY')
 );
 
 insert into bien_immobilier values (
@@ -57,9 +60,10 @@ insert into bien_immobilier values (
     131,
     1,
     1,
-    'd',
+    NULL,
     'Robertsau',
-    'maison'
+    'maison',
+    to_date('10-09-2013', 'DD-MM-YYYY')
 );
 
 insert into bien_immobilier values (
@@ -73,9 +77,10 @@ insert into bien_immobilier values (
     131,
     1,
     1,
-    'e',
+    NULL,
     'Robertsau',
-    'maison'
+    'maison',
+    to_date('10-09-2013', 'DD-MM-YYYY')
 );
 
 insert into bien_immobilier values (
@@ -89,9 +94,10 @@ insert into bien_immobilier values (
     131,
     1,
     1,
-    'f',
+    NULL,
     'Robertsau',
-    'maison'
+    'maison',
+    to_date('10-09-2013', 'DD-MM-YYYY')
 );
 
 insert into bien_immobilier values (
@@ -105,7 +111,8 @@ insert into bien_immobilier values (
     131,
     1,
     1,
-    'g',
+    NULL,
     'Robertsau',
-    'maison'
+    'maison',
+    to_date('10-09-2013', 'DD-MM-YYYY')
 );

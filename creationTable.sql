@@ -58,6 +58,19 @@ create table PERSONNEL
         AND lower(typePersonnel) IN ('directeur','secretaire','personnel administratif','agent immobilier'))
 );
 
+create table AGENT_INFO
+(
+    idPersonnel integer primary key,
+    nombre_de_ventes integer default 0,
+    benefice_total float default 0,
+    foreign key (idPersonnel) references PERSONNEL
+);
+
+create table IMAGE
+(
+    idImage integer primary key,
+    image_complete BLOB not null
+);
 create table RELATIONS_CLIENT
 (
     idPersonnel integer,
@@ -107,7 +120,7 @@ create table BIEN_IMMOBILIER
     tailleTerrain integer not null,
     nbEtages number(2) not null,
     nbAscenceurs number(1) not null,
-    idImage integer not null,
+    idImage integer,
     nomQuartier varchar2(32) not null,
     typeBien varchar2(12) not null,
     dateInitiale date,
@@ -209,17 +222,4 @@ create table HISTORIQUE_VENTE
         AND prixVente > 0.
         AND fraisAgence >= 0.03
         AND fraisAgence <= 0.10)
-);
-
-create table AGENT_INFO
-(
-    idPersonnel integer primary key,
-    nombre_de_ventes integer default 0,
-    benefice_total float default 0
-);
-
-create table IMAGE
-(
-    idImage integer primary key,
-    image_complete BLOB not null
 );
