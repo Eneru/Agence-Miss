@@ -1,6 +1,6 @@
 insert into vente values (
     1,
-    8,
+    1,
     100000,
     90000,
     20000,

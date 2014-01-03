@@ -130,7 +130,7 @@ create table RESERVATION_CRENEAU
 	idUtilisateur integer not null,
 	idPersonnel integer not null,
 	duree integer not null,
-	primary key (idBien,dateR),
+	primary key (idBien, dateR, idUtilisateur),
 	foreign key (idBien) references BIEN_IMMOBILIER,
 	foreign key (idUtilisateur) references UTILISATEUR,
 	foreign key (idPersonnel) references PERSONNEL,

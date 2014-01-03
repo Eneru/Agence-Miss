@@ -9,4 +9,4 @@
 @inserer_bien_immobiliers
 @inserer_reservations_creneaux
 @inserer_locations
-@inserer_vente
+@inserer_ventes
