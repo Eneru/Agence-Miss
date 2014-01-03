@@ -4,5 +4,6 @@ insert into vente values (
     100000,
     90000,
     20000,
-    10000
+    0.3,
+    to_date('01-02-2013', 'DD-MM-YYYY')
 );
