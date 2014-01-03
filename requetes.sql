@@ -11,4 +11,17 @@ where 5 <= (select count(*)
 
 --Pour chaque ville, le nombre de biens immobilier en location, le nombre de biens immobilier en vente et le nombre de clients cherchant un bien dans cette ville
 
-select idBien, prixInitial - prixCourant as manque from historique_vente natural join bien_immobilier where typebien like 'appartement';
+
+-- Manque à gagner sur les appartements vendus.
+select idBien, (prixInitial - prixCourant) as manque
+    from historique_vente natural join bien_immobilier
+    where typebien like 'appartement'
+;
+
+-- Clients ayant effectué le plus de visites.
+select idUtilisateur, nom, prenom
+    from reservation_creneau natural join utilisateur
+    group by (idUtilisateur, nom, prenom)
+    order by count(*)
+    where dateR >= add_months(sysdate, -1)
+;
