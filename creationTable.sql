@@ -54,7 +54,8 @@ create table PERSONNEL
     typePersonnel varchar2(32) not null,
     salaire float not null,
     foreign key (idUtilisateur) references UTILISATEUR,
-    CHECK (salaire >= 0. AND lower(typePersonnel) IN ('directeur','secretaire','personnel administratif','agent immobilier'))
+    CHECK (salaire >= 0.
+        AND lower(typePersonnel) IN ('directeur','secretaire','personnel administratif','agent immobilier'))
 );
 
 create table RELATIONS_CLIENT
@@ -106,12 +107,13 @@ create table BIEN_IMMOBILIER
     tailleTerrain integer not null,
     nbEtages number(2) not null,
     nbAscenceurs number(1) not null,
-    images varchar2(128) not null,
+    idImage integer not null,
     nomQuartier varchar2(32) not null,
     typeBien varchar2(12) not null,
-    UNIQUE (images),
+    dateInitiale date,
     foreign key (idUtilisateur) references UTILISATEUR,
     foreign key (nomQuartier) references QUARTIER,
+    foreign key (idImage) references IMAGE,
     CHECK (nbChambres >= 0
         AND nbSdB >= 0
         AND nbCuisines >= 0
@@ -129,7 +131,7 @@ create table RESERVATION_CRENEAU
     dateR date,
     idUtilisateur integer not null,
     idPersonnel integer not null,
-    duree integer not null,
+    duree integer not null,--en minutes
     primary key (idBien, dateR, idUtilisateur),
     foreign key (idBien) references BIEN_IMMOBILIER,
     foreign key (idUtilisateur) references UTILISATEUR,
@@ -144,7 +146,8 @@ create table LOCATION
     loyer float not null,
     charges float not null,
     fraisAgence float not null,
-    miseEnLocation date not null,
+    enLocation number(1) default 1,
+    dateLocation date default null,
     foreign key (idBien) references BIEN_IMMOBILIER,
     CHECK (loyer > 0.
         AND charges >= 0.
@@ -160,7 +163,8 @@ create table VENTE
     prixCourant float,
     marge float not null,
     fraisAgence float not null, -- pourcentage
-    miseEnVente date not null,
+    enVente number(1) default 1,
+    dateVente date default null,
     foreign key (idBien) references BIEN_IMMOBILIER,
     CHECK (prixInitial >= prixCourant
         AND marge >= 0.
@@ -205,4 +209,17 @@ create table HISTORIQUE_VENTE
         AND prixVente > 0.
         AND fraisAgence >= 0.03
         AND fraisAgence <= 0.10)
+);
+
+create table AGENT_INFO
+(
+    idPersonnel integer primary key,
+    nombre_de_ventes integer default 0,
+    benefice_total float default 0
+);
+
+create table IMAGE
+(
+    idImage integer primary key,
+    image_complete BLOB not null
 );
