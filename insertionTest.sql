@@ -7,3 +7,6 @@
 @inserer_personnel
 @inserer_relations_clients
 @inserer_bien_immobiliers
+@inserer_reservations_creneaux
+@inserer_locations
+@inserer_vente

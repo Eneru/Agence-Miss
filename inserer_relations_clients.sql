@@ -14,3 +14,9 @@ values (5, 7);
 
 insert into relations_client
 values (5, 8);
+
+insert into relations_client
+values (2, 11);
+
+insert into relations_client
+values (2, 12);

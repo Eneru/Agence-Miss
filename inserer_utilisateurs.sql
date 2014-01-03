@@ -37,3 +37,11 @@ values (9,'Gilles-Pierre','Train',02-06-1952,'Bois de Boulogne Paris','arriere.t
 -- Agent
 insert into utilisateur
 values (10, 'James', 'Bond', 01-01-1901, 'Quelque-part Paris', 'zerozeroseven@mi6.co.uk', 0000000000, 01-01-2013, 'jb', 'nsaisnoob');
+
+-- Locataire
+insert into utilisateur
+values (11, 'Sado', 'Missilefix', 23-11-1973, 'La rue Paris', 'noreply@downstreet.fr', 0000000000, 01-03-2002, 'sado', 'alarue');
+
+-- Propriétaire
+insert into utilisateur
+values (12, 'Dark', 'Vador', 23-11-1973, 'Etoile noire Paris', 'respiration@assistee.fr', 0000000000, 01-03-2002, 'anni', 'padme');
