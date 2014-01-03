@@ -156,14 +156,14 @@ create table VENTE
 	idVente integer primary key,
 	idBien integer not null,
 	prixInitial float not null,
-  prixCourant float default vente.prixInitial,
+    prixCourant float,
 	marge float not null,--La marge étant un pourcentage
 	fraisAgence float not null,
 	foreign key (idBien) references BIEN_IMMOBILIER,
 	CHECK (prixInitial > 0.
 		AND marge >= 0.
-		AND fraisAgence >= 0.03*prix
-		AND fraisAgence <= 0.10*prix)
+		AND fraisAgence >= 0.03*prixinitial
+		AND fraisAgence <= 0.10*prixinitial)
 );
 
 create table HISTORIQUE_LOCATION
