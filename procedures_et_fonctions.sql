@@ -70,11 +70,11 @@ BEGIN
       if(bien_envente_r.prixCourant - (2*bien_envente_r.prixCourant/100) < bien_envente_r.prixInitial - bien_envente_r.marge) then
         --Si on descend en dessous de la marge maximale autorisée alors on applique tout simplement la marge maximale
         update vente
-        set prixCourant:=prixInitiale-marge;
+        set prixCourant=prixInitiale-marge
         where current of bien_envente_c;
       else
         update vente
-        set prixCourant:=prixCourant-(2*prixCourant/100)
+        set prixCourant=prixCourant-(2*prixCourant/100)
         where current of bien_envente_c;
       end if;
     end if;
@@ -134,7 +134,7 @@ BEGIN
       values (nombre_bien_vendu+1, bien_r.idBien, bien_r.idUtilisateur, bien_r.idPersonnel, bien_r.prixInitial, bien_r.prixCourant, bien_r.fraisAgence, bien_r.dateVente);
       --Mise à jour de l'info sur l'agent vendeur
       update agent_info
-      set nombre_de_vente:=nombre_de_vente+1, benefice_total:=benefice_total+(bien_r.fraisAgence*bien_r.prixCourant);
+      set nombre_de_vente=nombre_de_vente+1, benefice_total:=benefice_total+(bien_r.fraisAgence*bien_r.prixCourant)
       where idPersonnel = bien_r.idPersonnel;
       --Suppression de la table de vente
       delete from vente where idBien=bien_r.idBien;
@@ -168,7 +168,7 @@ BEGIN
       values (nombre_bien_loue+1, bien_r.idBien, bien_r.idUtilisateur, bien_r.idPersonnel, bien_r.loyer, bien_r.charges, bien_r.fraisAgence, bien_r.dateLocation);
       --Mise à jour de l'info sur l'agent vendeur
       update agent_info
-      set nombre_de_vente:=nombre_de_vente+1, benefice_total:=benefice_total+bien_r.fraisAgence;
+      set nombre_de_vente=nombre_de_vente+1, benefice_total:=benefice_total+bien_r.fraisAgence
       where idPersonnel = bien_r.idPersonnel;
       --Suppression de la table de vente
       delete from location where idBien=bien_r.idBien;

@@ -178,7 +178,7 @@ BEGIN
     end if;
   end loop;
   
-  for client_r in liste_creneau_client_c
+  for client_r in liste_creneau_client_c loop
   --Si un client se trouve à deux endroits en meme temps
     if (:new.idUtilisateur=client_r.idUtilisateur
     AND :new.idBien!=client_r.idBien
@@ -195,7 +195,7 @@ END;
 ALTER TRIGGER visite_invalide ENABLE;
 
 create view pourcentage_rentabilite (identifiant_bien, rentabilite, prix) as
-  select idBien, ((prixDeVente/prixDeVenteInitial)*100), prixCourant
+  select idBien, ((prixCourant/prixInitial)*100), prixCourant
   from vente;
 --On autorise les gens à modifier le prix et sélectionner n'importe quoi dans la vue
 grant select, update(prix) on pourcentage_rentabilite to public;
