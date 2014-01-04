@@ -5,6 +5,7 @@ insert into historique_vente values (
     100000,
     80000,
     0.03,
+    1,
     to_date('15-12-2013', 'DD-MM-YYYY'),
     2400
 );
@@ -12,9 +13,11 @@ insert into historique_vente values (
 insert into historique_vente values (
     2,
     3,
+    3,
     120000,
     80000,
     0.03,
+    1,
     to_date('15-12-2013', 'DD-MM-YYYY'),
     2400
 );

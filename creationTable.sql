@@ -219,7 +219,6 @@ create table HISTORIQUE_LOCATION
     dateLocation date,
     foreign key (idBien) references BIEN_IMMOBILIER,
     foreign key (idUtilisateur) references UTILISATEUR,
-    foreign key (idPersonnel) references PERSONNEL,
     CHECK
     (
         loyer > 0.

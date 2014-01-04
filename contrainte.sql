@@ -3,56 +3,61 @@
 create or replace trigger naissance
     before insert or update on UTILISATEUR
     for each row
-    when (sysdate < :new.dateNaissance)
+    when (sysdate < new.dateNaissance)
 BEGIN
     -- soulever une exception
     RAISE_APPLICATION_ERROR(-20200, 'La date de naissance doit etre inferieure a la date du jour.');
 END;
 /
+show errors;
 ALTER TRIGGER naissance ENABLE;
 
 -- Noms de client invalides.
 create or replace trigger nom_invalide
     before insert or update on utilisateur
     for each row
-    when (:new.nom not like upper(:new.nom))
+    when (new.nom not like upper(new.nom))
 BEGIN
     :new.nom := upper(:new.nom);
 END;
 /
+show errors;
 ALTER TRIGGER nom_invalide ENABLE;
 
 -- Prénoms de client invalides.
 create or replace trigger prenom_invalide
     before insert or update on utilisateur
     for each row
-    when (:new.prenom not like initcap(:new.prenom))
+    when (new.prenom not like initcap(new.prenom))
 BEGIN
     :new.prenom := initcap(:new.prenom);
 END;
 /
+show errors;
 ALTER TRIGGER prenom_invalide ENABLE;
 
 -- Login invalides
 create or replace trigger login_invalide
     before insert or update on utilisateur
     for each row
-    when (not (regexp_like(:new.login,'^[:alpha:][:alnum:]+$')))
+    when (not (regexp_like(new.login,'^[:alpha:][:alnum:]+$')))
 BEGIN
     RAISE_APPLICATION_ERROR(-20204, 'Le login est invalide ; Il doit d''abord contenir une lettre puis une suite de chiffres ou de lettres.');
 END;
 /
+show errors;
 ALTER TRIGGER login_invalide ENABLE;
 
 --Refus des ajouts de courriel de client invalide
 create or replace trigger courriel_invalide
     before insert or update on utilisateur
     for each row
-    when (not (regexp_like(:new.courriel,'^[:alnum:]+@[:alpha:]+\.[:alpha:]{2,}$')))
+    when (not (regexp_like(new.courriel,'^[:alnum:]+@[:alpha:]+\.[:alnum:]{2,}$')))
 BEGIN
     RAISE_APPLICATION_ERROR(-20205, 'L''adresse courriel est invalide ; Elle doit etre du type nom@serveur.pays.');
 END;
 /
+show errors;
 ALTER TRIGGER courriel_invalide ENABLE;
 
 --Hachage du mot de passe
@@ -63,6 +68,7 @@ BEGIN
     :new.mdp := DBMS_OBFUSCATION_TOOLKIT.MD5(input_string => :new.mdp);
 END;
 /
+show errors;
 ALTER TRIGGER hachage_mdp ENABLE;
 
 -- BIEN_IMMOBILIER
@@ -70,11 +76,12 @@ ALTER TRIGGER hachage_mdp ENABLE;
 create or replace trigger insertionImmobilier
     before insert on bien_immobilier
     for each row
-    when (:new.dateInitiale = NULL)
+    when (new.dateInitiale = NULL)
 BEGIN
     :new.dateInitiale := sysdate;
 END;
 /
+show errors;
 ALTER TRIGGER insertionImmobilier ENABLE;
 
 -- RESERVATION_CRENEAU
@@ -82,11 +89,12 @@ ALTER TRIGGER insertionImmobilier ENABLE;
 create or replace trigger reserveCreneau
     before insert or update on RESERVATION_CRENEAU
     for each row
-    when (sysdate > :new.dateR)
+    when (sysdate > new.dateR)
 BEGIN
     RAISE_APPLICATION_ERROR(-20201, 'La date de reservation de creneau doit etre supérieure a la date du jour.');
 END;
 /
+show errors;
 ALTER TRIGGER reserveCreneau ENABLE;
 
 -- LOCATION
@@ -96,17 +104,17 @@ create or replace trigger insertion_location
     for each row
 BEGIN
     if (:new.loue = 0) then
-        if ( idUtilisateur != NULL OR dateLocation != NULL ) then
-            RAISE_APPLICATION_ERROR(-20211, 'Le bien n\'est pas loue, il ne peut pas etre associé à un utilisateur ou avoir une date de location.');
+        if ( :new.idUtilisateur != NULL OR :new.dateLocation != NULL ) then
+            RAISE_APPLICATION_ERROR(-20211, 'Bien non loue, il ne peut pas etre associé à un utilisateur ou avoir une date de location.');
         end if;
-    else if ( idUtilisateur = NULL OR dateLocation = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateLocation = NULL ) then
         RAISE_APPLICATION_ERROR(-20212, 'Le bien est loue, il doit etre associe à un utilisateur et une date de location.');
-        end if;
-    else if ( sysdate < :new.dateLocation ) then
+    elsif ( sysdate < :new.dateLocation ) then
         RAISE_APPLICATION_ERROR(-20202, 'La date de location doit etre inferieur a la date du jour.');
     end if;
 END;
 /
+show errors;
 ALTER TRIGGER insertion_location ENABLE;
 
 -- Suppression/Archivage
@@ -114,26 +122,27 @@ create or replace trigger archivage_location
     after delete on LOCATION
     for each row
 DECLARE
-    nouvelID_v HISTORIQUE_LOCATION.idHistLocation%type
+    nouvelID_v HISTORIQUE_LOCATION.idHistLocation%type;
 BEGIN
     select count(*)
         into nouvelID_v
         from historique_location
     ;
-    nouvelID := nouvelID + 1;
+    nouvelID_v := nouvelID_v + 1;
     insert into historique_location values
     (
-        nouvelID,
+        nouvelID_v,
         :old.idBien,
         :old.idUtilisateur,
         :old.loyer,
         :old.charges,
         :old.fraisAgence,
         :old.loue,
-        :old.dateLocation,
+        :old.dateLocation
     );
 END;
 /
+show errors;
 ALTER TRIGGER archivage_location ENABLE;
 
 -- VENTE
@@ -141,18 +150,18 @@ create or replace trigger insertion_vente
     before insert or update on VENTE
     for each row
 BEGIN
-    if (:new.loue = 0) then
-        if ( idUtilisateur != NULL OR dateVente != NULL ) then
-            RAISE_APPLICATION_ERROR(-20213, 'Le bien n\'est pas vendu, il ne peut pas etre associé à un utilisateur ou avoir une date de vente.');
+    if (:new.vendu = 0) then
+        if ( :new.idUtilisateur != NULL OR :new.dateVente != NULL ) then
+            RAISE_APPLICATION_ERROR(-20213, 'Bien non vendu, il ne peut pas etre associé à un utilisateur ou avoir une date de vente.');
         end if;
-    else if ( idUtilisateur = NULL OR dateVente = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateVente = NULL ) then
         RAISE_APPLICATION_ERROR(-20214, 'Le bien est vendu, il doit etre associe à un utilisateur et une date de location.');
-        end if;
-    else if ( sysdate < :new.dateVente ) then
+    elsif ( sysdate < :new.dateVente ) then
         RAISE_APPLICATION_ERROR(-20215, 'La date de vente doit etre inferieur a la date du jour.');
     end if;
 END;
 /
+show errors;
 ALTER TRIGGER insertion_vente ENABLE;
 
 -- Suppression/Archivage
@@ -160,16 +169,16 @@ create or replace trigger archivage_vente
     after delete on VENTE
     for each row
 DECLARE
-    nouvelID_v HISTORIQUE_VENTE.idHistVente%type
+    nouvelID_v HISTORIQUE_VENTE.idHistVente%type;
 BEGIN
     select count(*)
         into nouvelID_v
         from historique_vente
     ;
-    nouvelID := nouvelID + 1;
+    nouvelID_v := nouvelID_v + 1;
     insert into historique_vente values
     (
-        nouvelID,
+        nouvelID_v,
         :old.idBien,
         :old.idUtilisateur,
         :old.prixInitial,
@@ -181,6 +190,7 @@ BEGIN
     );
 END;
 /
+show errors;
 ALTER TRIGGER archivage_vente ENABLE;
 
 -- HISTORIQUE_LOCATION
@@ -189,17 +199,17 @@ create or replace trigger insertion_historique_location
     for each row
 BEGIN
     if (:new.loue = 0) then
-        if ( idUtilisateur != NULL OR dateLocation != NULL ) then
-            RAISE_APPLICATION_ERROR(-20216, 'Le bien n\'est pas loue, il ne peut pas etre associé à un utilisateur ou avoir une date de location.');
+        if ( :new.idUtilisateur != NULL OR :new.dateLocation != NULL ) then
+            RAISE_APPLICATION_ERROR(-20216, 'Bien non loue, il ne peut pas etre associé à un utilisateur ou avoir une date de location.');
         end if;
-    else if ( idUtilisateur = NULL OR dateLocation = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateLocation = NULL ) then
         RAISE_APPLICATION_ERROR(-20217, 'Le bien est loue, il doit etre associe à un utilisateur et une date de location.');
-        end if;
-    else if ( sysdate < :new.dateLocation ) then
+    elsif ( sysdate < :new.dateLocation ) then
         RAISE_APPLICATION_ERROR(-20218, 'La date de location doit etre inferieur a la date du jour.');
     end if;
 END;
 /
+show errors;
 ALTER TRIGGER insertion_historique_location ENABLE;
 
 -- HISTORIQUE_VENTE
@@ -207,22 +217,20 @@ create or replace trigger insertion_historique_vente
     before insert or update on HISTORIQUE_VENTE
     for each row
 BEGIN
-    if (:new.loue = 0) then
-        if ( idUtilisateur != NULL OR dateVente != NULL ) then
-            RAISE_APPLICATION_ERROR(-20219, 'Le bien n\'est pas vendu, il ne peut pas etre associé à un utilisateur ou avoir une date de vente.');
+    if (:new.vendu = 0) then
+        if ( :new.idUtilisateur != NULL OR :new.dateVente != NULL ) then
+            RAISE_APPLICATION_ERROR(-20219, 'Bien non vendu, il ne peut pas etre associé à un utilisateur ou avoir une date de vente.');
         end if;
-    else if ( idUtilisateur = NULL OR dateVente = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateVente = NULL ) then
         RAISE_APPLICATION_ERROR(-20220, 'Le bien est vendu, il doit etre associe à un utilisateur et une date de location.');
-        end if;
-    else if ( sysdate < :new.dateVente ) then
+    elsif ( sysdate < :new.dateVente ) then
         RAISE_APPLICATION_ERROR(-20221, 'La date de vente doit etre inferieur a la date du jour.');
-        end if;
-    else if ( :new.benefice != :new.prixVente * :new.fraisAgence ) then
+    elsif ( :new.benefice != :new.prixVente * :new.fraisAgence ) then
         RAISE_APPLICATION_ERROR(-20222, 'Bénéfice invalide.');
-        end if;
     end if;
 END;
 /
+show errors;
 ALTER TRIGGER insertion_historique_vente ENABLE;
 
 create or replace trigger visite_invalide
@@ -290,6 +298,7 @@ BEGIN
   end loop;
 END;
 /
+show errors;
 ALTER TRIGGER visite_invalide ENABLE;
 
 create view pourcentage_rentabilite (identifiant_bien, rentabilite, prix) as
