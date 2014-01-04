@@ -16,6 +16,12 @@
 		exit ;
 	}
 	
+	$query='execute changer_info_utilisateur('.$idUtilisateur.','.$nom.','.$prenom.','.$dateNaissance.','.$adresse.','.$courriel.','.$telephone.',null,null,null)';
+	$sql_result = oci_parse($connection,$query);
+	oci_execute($sql_result);
+	
+	oci_free_statement($sql_result);
+	
 	oci_close($connection) ;
 	
 	echo"<br><b>Modifications réussies !</b><br>";

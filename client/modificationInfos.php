@@ -21,7 +21,6 @@
 			Adresse : <input type="text" value="null" name="adresse"><br>
 			Courriel : <input type="text" value="null" name="courriel"><br>
 			Téléphone : <input type="text" value="null" name="telephone"><br>
-			Date d'inscription : <input type="text" value="null" name="dateInscription"><br>
 			<input type="submit" value="Modifier.">
 		</form>
 	</body>
