@@ -159,3 +159,35 @@ BEGIN
 END;
 /
 
+create or replace function rechercher_vente
+(
+    prixMin_p recherche.prixmin%type,
+    prixMax_p recherche.prixMax%type,
+    tailleMin_p recherche.tailleMin%type,
+    tailleMax_p recherche.tailleMax%type,
+    nbPiecesMin_p recherche.nbPiecesMin%type,
+    nbPiecesMax_p recherche.nbPiecesMax%type,
+    nomQuartier_p recherche.nomQuartier%type
+)
+return bien_immobilier.idbien%type
+IS
+    resultat_v bien_immobilier.idbien%type;
+BEGIN
+    select idbien
+        into resultat_v
+        from bien_immobilier natural join vente
+        where prixcourant >= prixMin_p
+            and prixcourant <= prixmax_p
+            and surface >= taillemin_p
+            and surface <= taillemax_p
+            and nbchambres >= nbpiecesmin_p
+            and nbchambres <= nbpiecesmax_p
+            and nomquartier = nomquartier_p
+            and vendu = 0
+            and rownum = 1
+        order by prixcourant asc
+    ;
+
+    return resultat_v;
+END;
+/
