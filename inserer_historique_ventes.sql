@@ -1,6 +1,7 @@
 insert into historique_vente values (
     1,
     2,
+    2,
     3,
     100000,
     80000,
@@ -13,6 +14,7 @@ insert into historique_vente values (
 insert into historique_vente values (
     2,
     3,
+    2,
     3,
     120000,
     80000,

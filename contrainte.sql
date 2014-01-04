@@ -71,6 +71,21 @@ END;
 show errors;
 ALTER TRIGGER hachage_mdp ENABLE;
 
+-- Agents
+create or replace trigger agent_immobilier
+    after insert on personnel
+    for each row
+    when (new.typePersonnel like '%agent immobilier%')
+BEGIN
+    insert into agent_info values
+    (
+        :new.idPersonnel,
+        0,
+        0.
+    );
+END;
+/
+
 -- BIEN_IMMOBILIER
 -- Date initiale
 create or replace trigger insertionImmobilier
@@ -133,6 +148,7 @@ BEGIN
     (
         nouvelID_v,
         :old.idBien,
+        :old.idPersonnel,
         :old.idUtilisateur,
         :old.loyer,
         :old.charges,
@@ -151,10 +167,10 @@ create or replace trigger insertion_vente
     for each row
 BEGIN
     if (:new.vendu = 0) then
-        if ( :new.idUtilisateur != NULL OR :new.dateVente != NULL ) then
+        if ( :new.idUtilisateur != NULL OR :new.dateVente != NULL OR :new.idPersonnel != NULL ) then
             RAISE_APPLICATION_ERROR(-20213, 'Bien non vendu, il ne peut pas etre associé à un utilisateur ou avoir une date de vente.');
         end if;
-    elsif ( :new.idUtilisateur = NULL OR :new.dateVente = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateVente = NULL OR :new.idPersonnel = NULL ) then
         RAISE_APPLICATION_ERROR(-20214, 'Le bien est vendu, il doit etre associe à un utilisateur et une date de location.');
     elsif ( sysdate < :new.dateVente ) then
         RAISE_APPLICATION_ERROR(-20215, 'La date de vente doit etre inferieur a la date du jour.');
@@ -180,6 +196,7 @@ BEGIN
     (
         nouvelID_v,
         :old.idBien,
+        :old.idPersonnel,
         :old.idUtilisateur,
         :old.prixInitial,
         :old.prixCourant,
@@ -199,10 +216,10 @@ create or replace trigger insertion_historique_location
     for each row
 BEGIN
     if (:new.loue = 0) then
-        if ( :new.idUtilisateur != NULL OR :new.dateLocation != NULL ) then
+        if ( :new.idUtilisateur != NULL OR :new.dateLocation != NULL OR :new.idPersonnel != NULL ) then
             RAISE_APPLICATION_ERROR(-20216, 'Bien non loue, il ne peut pas etre associé à un utilisateur ou avoir une date de location.');
         end if;
-    elsif ( :new.idUtilisateur = NULL OR :new.dateLocation = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateLocation = NULL OR :new.idPersonnel = NULL ) then
         RAISE_APPLICATION_ERROR(-20217, 'Le bien est loue, il doit etre associe à un utilisateur et une date de location.');
     elsif ( sysdate < :new.dateLocation ) then
         RAISE_APPLICATION_ERROR(-20218, 'La date de location doit etre inferieur a la date du jour.');
@@ -232,6 +249,227 @@ END;
 /
 show errors;
 ALTER TRIGGER insertion_historique_vente ENABLE;
+
+create or replace procedure verifier_performances
+    (idPersonnel_p agent_info.idPersonnel%type)
+is
+    temp_succes_v integer;
+    temp_benefices_v float;
+    somme_succes_v integer;
+    somme_benefices_v float;
+BEGIN
+    somme_succes_v := 0;
+    somme_benefices_v := 0.;
+
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select prixCourant * fraisAgence as benefice
+                from vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select benefice
+                from historique_vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select fraisAgence
+                from location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select fraisAgence
+                from historique_location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
+
+    select sum(benefice)
+        into temp_benefices_v
+        from
+        (
+            select prixCourant * fraisAgence as benefice
+                from vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
+    select sum(benefice)
+        into temp_benefices_v
+        from
+        (
+            select benefice
+                from historique_vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
+    select sum(fraisAgence)
+        into temp_benefices_v
+        from
+        (
+            select fraisAgence
+                from location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
+    select sum(fraisAgence)
+        into temp_benefices_v
+        from
+        (
+            select fraisAgence
+                from historique_location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
+
+    update agent_info set
+        nombre_de_ventes = somme_succes_v,
+        benefice_total = somme_benefices_v
+    where idPersonnel = idPersonnel_p;
+END;
+/
+show errors;
+
+create or replace trigger bien_vendu
+    after insert or update on VENTE
+DECLARE
+    compte_v integer;
+    cursor biens_vendus_c is
+        select distinct idpersonnel from vente where vendu = 1;
+BEGIN
+    select count(*)
+        into compte_v
+        from vente
+        where vendu = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_vendus_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
+END;
+/
+show errors;
+ALTER TRIGGER bien_vendu ENABLE;
+
+create or replace trigger bien_vendu_historique
+    after insert or update on HISTORIQUE_VENTE
+DECLARE
+    compte_v integer;
+    cursor biens_vendus_c is
+        select distinct idpersonnel from historique_vente where vendu = 1;
+BEGIN
+    select count(*)
+        into compte_v
+        from historique_vente
+        where vendu = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_vendus_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
+END;
+/
+show errors;
+ALTER TRIGGER bien_vendu_historique ENABLE;
+
+create or replace trigger bien_loue
+    after insert or update on LOCATION
+DECLARE
+    compte_v integer;
+    cursor biens_loues_c is
+        select distinct idpersonnel from location where loue = 1;
+BEGIN
+    select count(*)
+        into compte_v
+        from location
+        where loue = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_loues_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
+END;
+/
+show errors;
+ALTER TRIGGER bien_loue ENABLE;
+
+create or replace trigger bien_loue_historique
+    after insert or update on LOCATION
+DECLARE
+    compte_v integer;
+    cursor biens_loues_c is
+        select distinct idpersonnel from historique_location where loue = 1;
+BEGIN
+    select count(*)
+        into compte_v
+        from historique_location
+        where loue = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_loues_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
+END;
+/
+show errors;
+ALTER TRIGGER bien_loue ENABLE;
 
 create or replace trigger visite_invalide
     before insert or update on reservation_creneau
@@ -305,5 +543,7 @@ ALTER TRIGGER visite_invalide ENABLE;
 create or replace view pourcentage_rentabilite (identifiant_bien, rentabilite, prix) as
 select idBien, ((prixCourant/prixInitial)*100), prixCourant
 from vente;
---On autorise les gens à modifier le prix et sélectionner n'importe quoi dans la vue
+--On autorise les gens à modifier le prix et sélectionner n''importe quoi dans la vue
 grant select, update(prix) on pourcentage_rentabilite to public;
+
+
