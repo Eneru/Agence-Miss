@@ -27,7 +27,7 @@
 			?>
 			Identifiant du bien à visiter : <input type="number" name="idBien"><br>
 			Date de visite : <input type="text" name="dateR"><br>
-			Identifiant de la personne visitante : <input type="number" name="idUtilisateur"><br>
+			Identifiant de la personne visitante : <input type="number" name="idClient"><br>
 			Duree : <input type="number" name="duree"><br>
 			<input type="submit" value="Créer la visite.">
 		</form>
