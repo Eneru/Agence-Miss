@@ -167,10 +167,10 @@ create or replace trigger insertion_vente
     for each row
 BEGIN
     if (:new.vendu = 0) then
-        if ( :new.idUtilisateur != NULL OR :new.dateVente != NULL ) then
+        if ( :new.idUtilisateur != NULL OR :new.dateVente != NULL OR :new.idPersonnel != NULL ) then
             RAISE_APPLICATION_ERROR(-20213, 'Bien non vendu, il ne peut pas etre associé à un utilisateur ou avoir une date de vente.');
         end if;
-    elsif ( :new.idUtilisateur = NULL OR :new.dateVente = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateVente = NULL OR :new.idPersonnel = NULL ) then
         RAISE_APPLICATION_ERROR(-20214, 'Le bien est vendu, il doit etre associe à un utilisateur et une date de location.');
     elsif ( sysdate < :new.dateVente ) then
         RAISE_APPLICATION_ERROR(-20215, 'La date de vente doit etre inferieur a la date du jour.');
@@ -216,10 +216,10 @@ create or replace trigger insertion_historique_location
     for each row
 BEGIN
     if (:new.loue = 0) then
-        if ( :new.idUtilisateur != NULL OR :new.dateLocation != NULL ) then
+        if ( :new.idUtilisateur != NULL OR :new.dateLocation != NULL OR :new.idPersonnel != NULL ) then
             RAISE_APPLICATION_ERROR(-20216, 'Bien non loue, il ne peut pas etre associé à un utilisateur ou avoir une date de location.');
         end if;
-    elsif ( :new.idUtilisateur = NULL OR :new.dateLocation = NULL ) then
+    elsif ( :new.idUtilisateur = NULL OR :new.dateLocation = NULL OR :new.idPersonnel = NULL ) then
         RAISE_APPLICATION_ERROR(-20217, 'Le bien est loue, il doit etre associe à un utilisateur et une date de location.');
     elsif ( sysdate < :new.dateLocation ) then
         RAISE_APPLICATION_ERROR(-20218, 'La date de location doit etre inferieur a la date du jour.');
@@ -405,6 +405,28 @@ END;
 show errors;
 ALTER TRIGGER bien_vendu ENABLE;
 
+create or replace trigger bien_vendu_historique
+    after insert or update on HISTORIQUE_VENTE
+DECLARE
+    compte_v integer;
+    cursor biens_vendus_c is
+        select distinct idpersonnel from historique_vente where vendu = 1;
+BEGIN
+    select count(*)
+        into compte_v
+        from historique_vente
+        where vendu = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_vendus_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
+END;
+/
+show errors;
+ALTER TRIGGER bien_vendu_historique ENABLE;
+
 create or replace trigger bien_loue
     after insert or update on LOCATION
 DECLARE
@@ -415,6 +437,28 @@ BEGIN
     select count(*)
         into compte_v
         from location
+        where loue = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_loues_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
+END;
+/
+show errors;
+ALTER TRIGGER bien_loue ENABLE;
+
+create or replace trigger bien_loue_historique
+    after insert or update on LOCATION
+DECLARE
+    compte_v integer;
+    cursor biens_loues_c is
+        select distinct idpersonnel from historique_location where loue = 1;
+BEGIN
+    select count(*)
+        into compte_v
+        from historique_location
         where loue = 1
     ;
     if (compte_v > 0) then

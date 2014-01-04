@@ -97,7 +97,7 @@ show errors;
 create or replace procedure archivage
 IS
 BEGIN
-    -- Les triggers archivent tout bien supprime.
+    -- Les triggers archivent tout bien supprimé.
     delete from vente where vendu = 1;
     delete from location where loue = 1;
 END;

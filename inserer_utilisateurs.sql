@@ -6,7 +6,7 @@ insert into utilisateur values (
     to_date('22-01-1993', 'DD-MM-YYYY'),
     '51 rue Schott Strasbourg',
     'jeremy.meyer@etu.unistra.fr',
-    0633884935,
+    '0633884935',
     to_date('14-07-2012', 'DD-MM-YYYY'),
     'jmeyer',
     'motdepasse'
@@ -20,7 +20,7 @@ insert into utilisateur values (
     to_date('10-03-1992', 'DD-MM-YYYY'),
     '28 Strassburgstrasse Kehl',
     'razanajato@etu.unistra.fr',
-    0692781423,
+    '0692781423',
     to_date('25-12-2012', 'DD-MM-YYYY'),
     'hranaz',
     'crypte'
@@ -34,7 +34,7 @@ insert into utilisateur values (
     to_date('09-03-1993', 'DD-MM-YYYY'),
     '93 izi Paris',
     'rakaydu93@hotmail.com',
-    0793939393,
+    '0793939393',
     to_date('02-09-2013', 'DD-MM-YYYY'),
     'ghettoyou',
     '93izi'
@@ -48,7 +48,7 @@ insert into utilisateur values (
     to_date('28-04-1975', 'DD-MM-YYYY'),
     '23 rue du Paradis Eden',
     'jeparleauxfantomes@msn.fr',
-    0349687591,
+    '0349687591',
     to_date('07-11-2013', 'DD-MM-YYYY'),
     'faon',
     'tome'
@@ -76,7 +76,7 @@ insert into utilisateur values (
     to_date('29-02-1984', 'DD-MM-YYYY'),
     '42 route de la Wantzenau Strasbourg',
     'lard.bain@gmail.fr',
-    0801040608,
+    '0801040608',
     to_date('27-12-2013', 'DD-MM-YYYY'),
     'root',
     'root'
@@ -90,7 +90,7 @@ insert into utilisateur values (
     to_date('06-12-270', 'DD-MM-YYYY'),
     '14 rue de l''Eglise Sarreguemines',
     'saint.nicolas@etu.unistra.fr',
-    0312345678,
+    '0312345678',
     to_date('28-12-2013', 'DD-MM-YYYY'),
     'saint',
     'nicolas'
@@ -104,7 +104,7 @@ insert into utilisateur values (
     to_date('23-05-1988', 'DD-MM-YYYY'),
     'Bois de Boulogne Paris',
     'jeanbon.beurre@orange.fr',
-    0488091523,
+    '0488091523',
     to_date('31-12-2014', 'DD-MM-YYYY'),
     'bonne',
     'annee'
@@ -118,7 +118,7 @@ insert into utilisateur values (
     to_date('02-06-1952', 'DD-MM-YYYY'),
     'Bois de Boulogne Paris',
     'arriere.train@orange.fr',
-    0488091523,
+    '0488091523',
     to_date('31-12-2014', 'DD-MM-YYYY'),
     'gpt',
     'etcapue'
@@ -132,7 +132,7 @@ insert into utilisateur values (
     to_date('01-01-1901', 'DD-MM-YYYY'),
     'Quelque-part Paris',
     'zerozeroseven@mi6.co.uk',
-    0000000000,
+    '0000000000',
     to_date('01-01-2013', 'DD-MM-YYYY'),
     'jb',
     'nsaisnoob'
@@ -146,7 +146,7 @@ insert into utilisateur values (
     to_date('23-11-1973', 'DD-MM-YYYY'),
     'La rue Paris',
     'noreply@downstreet.fr',
-    0000000000,
+    '0000000000',
     to_date('01-03-2002', 'DD-MM-YYYY'),
     'sado',
     'alarue'
@@ -160,7 +160,7 @@ insert into utilisateur values (
     to_date('23-11-1973', 'DD-MM-YYYY'),
     'Etoile noire Paris',
     'respiration@assistee.fr',
-    0000000000,
+    '0000000000',
     to_date('01-03-2002', 'DD-MM-YYYY'),
     'anni',
     'padme'
