@@ -40,7 +40,7 @@ ALTER TRIGGER prenom_invalide ENABLE;
 create or replace trigger login_invalide
     before insert or update on utilisateur
     for each row
-    when (not (regexp_like(new.login,'^[:alpha:][:alnum:]+$')))
+    when (not (regexp_like(new.login,'^[[:alpha:]][[:alnum:]]+$')))
 BEGIN
     RAISE_APPLICATION_ERROR(-20204, 'Le login est invalide ; Il doit d''abord contenir une lettre puis une suite de chiffres ou de lettres.');
 END;
@@ -52,7 +52,7 @@ ALTER TRIGGER login_invalide ENABLE;
 create or replace trigger courriel_invalide
     before insert or update on utilisateur
     for each row
-    when (not (regexp_like(new.courriel,'^[:alnum:]+@[:alpha:]+\.[:alnum:]{2,}$')))
+    when (not (regexp_like(new.courriel,'^[[:alpha:]][[:alnum:]\-\_\.]+@[[:alnum:]\-\_\.]+[[:alpha:]]{2,}$')))
 BEGIN
     RAISE_APPLICATION_ERROR(-20205, 'L''adresse courriel est invalide ; Elle doit etre du type nom@serveur.pays.');
 END;
