@@ -39,7 +39,7 @@ create table UTILISATEUR
     dateNaissance date not null,
     adresse varchar2(64) not null,
     courriel varchar2(64) not null,
-    telephone integer not null,
+    telephone varchar2(10) not null,
     dateInscription date not null,
     login varchar(16) not null,
     mdp varchar(16) not null,
@@ -167,6 +167,7 @@ create table LOCATION
 (
     idLocation integer primary key,
     idBien integer not null,
+    idPersonnel integer,
     idUtilisateur integer,
     loyer float not null,
     charges float not null,
@@ -188,6 +189,7 @@ create table VENTE
 (
     idVente integer primary key,
     idBien integer not null,
+    idPersonnel integer,
     idUtilisateur integer,
     prixInitial float not null,
     prixCourant float,
@@ -211,6 +213,7 @@ create table HISTORIQUE_LOCATION
 (
     idHistLocation integer primary key,
     idBien integer not null,
+    idPersonnel integer,
     idUtilisateur integer,
     loyer float not null,
     charges float not null,
@@ -232,6 +235,7 @@ create table HISTORIQUE_VENTE
 (
     idHistVente integer primary key,
     idBien integer not null,
+    idPersonnel integer,
     idUtilisateur integer,
     prixInitial float not null,
     prixVente float not null,
