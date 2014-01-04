@@ -209,15 +209,12 @@ create table HISTORIQUE_VENTE
 (
     idHistVente integer primary key,
     idBien integer not null,
-    idUtilisateur integer not null,
-    idPersonnel integer not null,
     prixInitial float not null,
     prixVente float not null,
     fraisAgence float not null,
     dateV date not null,
+    benefice float not null,
     foreign key (idBien) references BIEN_IMMOBILIER,
-    foreign key (idUtilisateur) references UTILISATEUR,
-    foreign key (idPersonnel) references PERSONNEL,
     CHECK (prixInitial >= prixVente
         AND prixVente > 0.
         AND fraisAgence >= 0.03

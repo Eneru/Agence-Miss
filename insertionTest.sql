@@ -10,3 +10,6 @@
 @inserer_reservations_creneaux
 @inserer_locations
 @inserer_ventes
+@inserer_historique_ventes
+@inserer_recherches
+@inserer_recherches_clients

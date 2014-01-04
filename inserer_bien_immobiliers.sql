@@ -45,7 +45,7 @@ insert into bien_immobilier values (
     1,
     NULL,
     'Robertsau',
-    'maison',
+    'appartement',
     to_date('10-09-2013', 'DD-MM-YYYY')
 );
 
