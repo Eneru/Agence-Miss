@@ -272,7 +272,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
         )
     ;
-    somme_succes_v := somme_succes_v + temp_succes_v;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
     select count(*)
         into temp_succes_v
         from
@@ -284,7 +286,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
         )
     ;
-    somme_succes_v := somme_succes_v + temp_succes_v;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
     select count(*)
         into temp_succes_v
         from
@@ -296,7 +300,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
         )
     ;
-    somme_succes_v := somme_succes_v + temp_succes_v;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
     select count(*)
         into temp_succes_v
         from
@@ -308,7 +314,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
         )
     ;
-    somme_succes_v := somme_succes_v + temp_succes_v;
+    if (temp_succes_v > 0) then
+        somme_succes_v := somme_succes_v + temp_succes_v;
+    end if;
 
     select sum(benefice)
         into temp_benefices_v
@@ -321,7 +329,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
         )
     ;
-    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
     select sum(benefice)
         into temp_benefices_v
         from
@@ -333,7 +343,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
         )
     ;
-    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
     select sum(fraisAgence)
         into temp_benefices_v
         from
@@ -345,7 +357,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
         )
     ;
-    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
     select sum(fraisAgence)
         into temp_benefices_v
         from
@@ -357,7 +371,9 @@ BEGIN
                     AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
         )
     ;
-    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    if (temp_benefices_v > 0.) then
+        somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    end if;
 
     update agent_info set
         nombre_de_ventes = somme_succes_v,
@@ -368,22 +384,44 @@ END;
 show errors;
 
 create or replace trigger bien_vendu
-    before insert or update on VENTE
-    for each row
-    when (new.vendu = 1)
+    after insert or update on VENTE
+DECLARE
+    compte_v integer;
+    cursor biens_vendus_c is
+        select distinct idpersonnel from vente where vendu = 1;
 BEGIN
-    verifier_performances(:new.idPersonnel);
+    select count(*)
+        into compte_v
+        from vente
+        where vendu = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_vendus_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
 END;
 /
 show errors;
 ALTER TRIGGER bien_vendu ENABLE;
 
 create or replace trigger bien_loue
-    before insert or update on LOCATION
-    for each row
-    when (new.loue = 1)
+    after insert or update on LOCATION
+DECLARE
+    compte_v integer;
+    cursor biens_loues_c is
+        select distinct idpersonnel from location where loue = 1;
 BEGIN
-    verifier_performances(:new.idPersonnel);
+    select count(*)
+        into compte_v
+        from location
+        where loue = 1
+    ;
+    if (compte_v > 0) then
+        for id_r in biens_loues_c loop
+            verifier_performances(id_r.idpersonnel);
+        end loop;
+    end if;
 END;
 /
 show errors;
