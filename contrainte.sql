@@ -234,75 +234,76 @@ show errors;
 ALTER TRIGGER insertion_historique_vente ENABLE;
 
 create or replace trigger visite_invalide
-before insert on reservation_creneau
-for each row
+    before insert or update on reservation_creneau
+    for each row
 DECLARE
-  jour_de_la_semaine varchar(10);
-  nombre_de_reservation integer;
-
-  cursor liste_creneau_agent_c is
-    select idPersonnel, idBien, dateR, duree
-    from reservation_creneau natural join relations_client;
-
-  cursor liste_creneau_client_c is
-    select idUtilisateur, idBien, dateR, duree
-    from reservation_creneau;
-
+    jour_de_la_semaine varchar2(16);
+    nombre_de_reservation integer;
+    cursor liste_creneau_agent_c is
+        select idPersonnel, idBien, dateR, duree
+            from reservation_creneau natural join relations_client;
+    cursor liste_creneau_client_c is
+        select idUtilisateur, idBien, dateR, duree
+            from reservation_creneau;
 BEGIN
-  select upper(to_char(:new.dateR, 'DAY'))
-  into jour_de_la_semaine
-  from dual;
+    --select to_number(to_char(:new.dateR, 'fmD'))
+    --    into jour_de_la_semaine
+    --    from dual;
+    jour_de_la_semaine := upper(to_char(:new.dateR, 'DAY'));
 
-  --Si la réservation est un dimanche on soulève une excpetion
-  if (jour_de_la_semaine like 'SUNDAY') then
-    raise_application_error(-20206, 'Rerservation non autorisee le dimanche.');
-  end if;
-
-  select count(*)
-  into nombre_de_reservation
-  from reservation_creneau rc
-  where :new.dateR = rc.dateR;
-
-  --Si le nombre de réservation est supérieur à 2 alors on empèche la réservation
-  if (nombre_de_reservation > 3=) then
-    raise_application_error(-20207, 'Il y a deja 3 reservations le jour la.');
-  end if;
-
-  --Si l'heure de la réservation n'est pas comprise entre 8 et 20 alors on empèche la réservation
-  if (to_number(to_char(:new.dateR,hh24))<8 || (to_number(to_char(:new.dateR,hh24))+duree/60)>20) then
-    raise_application_error(-20208, 'La reservation doit commencer à partir de 8h et finir avant 20h.');
-  end if;
-
-  for agent_r in liste_creneau_agent_c loop
-  --Si un agent se trouve à deux endroits en meme temps
-    if (:new.idPersonnel=agent_r.idPersonnel
-    AND :new.idBien!=agent_r.idBien
-    AND not ((:new.dateR<agent_r.dateR AND :new.dateR+:new.duree<agent_r.dateR+agent_r.duree
-            OR :new.dateR>agent_r.dateR AND :new.dateR+:new.duree>agent_r.dateR+agent_r.duree)
-            )
-    )then
-      raise_application_error(-20209, 'Un agent ne peut se trouver a deux endroits en meme temps.');
+    if (to_char(:new.dateR, 'DAY') like '%SUNDAY%') then
+        raise_application_error(-20206, 'Rerservation non autorisee le dimanche.');
     end if;
-  end loop;
 
-  for client_r in liste_creneau_client_c loop
-  --Si un client se trouve à deux endroits en meme temps
-    if (:new.idUtilisateur=client_r.idUtilisateur
-    AND :new.idBien!=client_r.idBien
-    AND not ((:new.dateR<client_r.dateR AND :new.dateR+:new.duree<client_r.dateR+client_r.duree
-            OR :new.dateR>client_r.dateR AND :new.dateR+:new.duree>client_r.dateR+client_r.duree)
-            )
-    )then
-      raise_application_error(-20210, 'Un client ne peut se trouver a deux endroits en meme temps.');
+    select count(*)
+        into nombre_de_reservation
+        from reservation_creneau rc
+        where :new.dateR = rc.dateR;
+
+    --Si le nombre de réservation est supérieur à 3 alors on empèche la réservation
+    if (nombre_de_reservation > 3) then
+        raise_application_error(-20207, 'Il y a deja 3 reservations le jour la.');
     end if;
-  end loop;
+
+    --Si l'heure de la réservation n'est pas comprise entre 8 et 20 alors on empèche la réservation
+    if (to_number(to_char(:new.dateR, 'hh24')) < 8
+        OR (to_number(to_char(:new.dateR, 'hh24')) + :new.duree / 60) > 20
+    ) then
+        raise_application_error(-20208, 'La reservation doit commencer apres 8h et finir avant 20h.');
+    end if;
+
+    for agent_r in liste_creneau_agent_c loop
+        --Si un agent se trouve à deux endroits en meme temps
+        if (:new.idPersonnel = agent_r.idPersonnel
+            AND :new.idBien != agent_r.idBien
+            AND not (
+                (:new.dateR < agent_r.dateR AND :new.dateR + :new.duree < agent_r.dateR + agent_r.duree)
+                OR (:new.dateR > agent_r.dateR AND :new.dateR + :new.duree > agent_r.dateR + agent_r.duree)
+            )
+        ) then
+            raise_application_error(-20209, 'Un agent ne peut se trouver a deux endroits en meme temps.');
+        end if;
+    end loop;
+
+    for client_r in liste_creneau_client_c loop
+        --Si un client se trouve à deux endroits en meme temps
+        if (:new.idUtilisateur = client_r.idUtilisateur
+            AND :new.idBien != client_r.idBien
+            AND not (
+                (:new.dateR < client_r.dateR AND :new.dateR + :new.duree < client_r.dateR + client_r.duree)
+                OR (:new.dateR > client_r.dateR AND :new.dateR + :new.duree > client_r.dateR + client_r.duree)
+            )
+        ) then
+            raise_application_error(-20210, 'Un client ne peut se trouver a deux endroits en meme temps.');
+        end if;
+    end loop;
 END;
 /
 show errors;
 ALTER TRIGGER visite_invalide ENABLE;
 
-create view pourcentage_rentabilite (identifiant_bien, rentabilite, prix) as
-  select idBien, ((prixCourant/prixInitial)*100), prixCourant
-  from vente;
+create or replace view pourcentage_rentabilite (identifiant_bien, rentabilite, prix) as
+select idBien, ((prixCourant/prixInitial)*100), prixCourant
+from vente;
 --On autorise les gens à modifier le prix et sélectionner n'importe quoi dans la vue
 grant select, update(prix) on pourcentage_rentabilite to public;
