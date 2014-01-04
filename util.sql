@@ -54,63 +54,62 @@ create or replace procedure changer_infos_utilisateur
     telephone_p utilisateur.telephone%type,
     dateInscription_p utilisateur.dateinscription%type,
     login_p utilisateur.login%type,
-    mdp_p utilisateur.mdp%type,
+    mdp_p utilisateur.mdp%type
 )
 IS
-    idUtilisateur_v utilisateur.idutilisateur%type,
-    nom_v utilisateur.nom%type,
-    prenom_v utilisateur.prenom%type,
-    dateNaissance_v utilisateur.datenaissance%type,
-    adresse_v utilisateur.adresse%type,
-    courriel_v utilisateur.courriel%type,
-    telephone_v utilisateur.telephone%type,
-    dateInscription_v utilisateur.dateinscription%type,
-    login_v utilisateur.login%type,
-    mdp_v utilisateur.mdp%type,
-
+    idUtilisateur_v utilisateur.idutilisateur%type;
+    nom_v utilisateur.nom%type;
+    prenom_v utilisateur.prenom%type;
+    dateNaissance_v utilisateur.datenaissance%type;
+    adresse_v utilisateur.adresse%type;
+    courriel_v utilisateur.courriel%type;
+    telephone_v utilisateur.telephone%type;
+    dateInscription_v utilisateur.dateinscription%type;
+    login_v utilisateur.login%type;
+    mdp_v utilisateur.mdp%type;
 BEGIN
     if (nom_p = null) then
-        select nom from utilisateur into nom_v where idutilisateur = idutilisateur_p;
+        select nom into nom_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         nom_v := nom_p;
     end if;
     if (prenom_p = null) then
-        select prenom from utilisateur into prenom_v where idutilisateur = idutilisateur_p;
+        select prenom into prenom_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         prenom_v := prenom_p;
     end if;
     if (dateNaissance_p = null) then
-        select dateNaissance from utilisateur into dateNaissance_v where idutilisateur = idutilisateur_p;
+        select dateNaissance into dateNaissance_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         dateNaissance_v := dateNaissance_p;
     end if;
     if (adresse_p = null) then
-        select adresse from utilisateur into adresse_v where idutilisateur = idutilisateur_p;
+        select adresse into adresse_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         adresse_v := adresse_p;
     end if;
     if (courriel_p = null) then
-        select courriel from utilisateur into courriel_v where idutilisateur = idutilisateur_p;
+        select courriel into courriel_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         courriel_v := courriel_p;
     end if;
     if (telephone_p = null) then
-        select telephone from utilisateur into telephone_v where idutilisateur = idutilisateur_p;
+        select telephone into telephone_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         telephone_v := telephone_p;
     end if;
     if (dateinscription_p = null) then
-        select dateinscription from utilisateur into dateinscription_v where idutilisateur = idutilisateur_p;
+        select dateinscription into dateinscription_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         dateinscription_v := dateinscription_p;
     end if;
     if (login_p = null) then
-        select login from utilisateur into login_v where idutilisateur = idutilisateur_p;
+        select login into login_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         login_v := login_p;
     end if;
     if (mdp_p = null) then
-        select mdp from utilisateur into mdp_v where idutilisateur = idutilisateur_p;
+        select mdp into mdp_v from utilisateur where idutilisateur = idutilisateur_p;
     else
         mdp_v := mdp_p;
     end if;
@@ -126,5 +125,69 @@ BEGIN
          login =                  login_v,
          mdp =                    mdp_v
     where idUtilisateur = idutilisateur_p;
+END;
+/
+
+create or replace procedure ajouter_recherche
+(
+    prixMin_p recherche.prixmin%type,
+    prixMax_p recherche.prixMax%type,
+    tailleMin_p recherche.tailleMin%type,
+    tailleMax_p recherche.tailleMax%type,
+    nbPiecesMin_p recherche.nbPiecesMin%type,
+    nbPiecesMax_p recherche.nbPiecesMax%type,
+    nomQuartier_p recherche.nomQuartier%type
+)
+IS
+    nouvel_id_v recherche.idrecherche%type;
+BEGIN
+    select max(idrecherche)
+        into nouvel_id_v
+        from recherche;
+    nouvel_id_v := nouvel_id_v + 1;
+    insert into recherche values
+    (
+        nouvel_id_v,
+        prixMin_p,
+        prixMax_p,
+        tailleMin_p,
+        tailleMax_p,
+        nbPiecesMin_p,
+        nbPiecesMax_p,
+        nomQuartier_p
+    );
+END;
+/
+
+create or replace function rechercher_vente
+(
+    prixMin_p recherche.prixmin%type,
+    prixMax_p recherche.prixMax%type,
+    tailleMin_p recherche.tailleMin%type,
+    tailleMax_p recherche.tailleMax%type,
+    nbPiecesMin_p recherche.nbPiecesMin%type,
+    nbPiecesMax_p recherche.nbPiecesMax%type,
+    nomQuartier_p recherche.nomQuartier%type
+)
+return bien_immobilier.idbien%type
+IS
+    resultat_v bien_immobilier.idbien%type;
+BEGIN
+    select idbien
+        into resultat_v
+        from bien_immobilier natural join vente
+        where prixcourant >= prixMin_p
+            and prixcourant <= prixmax_p
+            and surface >= taillemin_p
+            and surface <= taillemax_p
+            and nbchambres >= nbpiecesmin_p
+            and nbchambres <= nbpiecesmax_p
+            and nomquartier = nomquartier_p
+            and vendu = 0
+            and rownum = 1
+        order by prixcourant asc
+    ;
+
+    return resultat_v;
 END;
 /
