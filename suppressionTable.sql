@@ -1,7 +1,3 @@
-drop table image;
-
-drop table agent_info;
-
 drop table historique_vente;
 drop table historique_location;
 drop table vente;
