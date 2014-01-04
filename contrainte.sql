@@ -71,6 +71,21 @@ END;
 show errors;
 ALTER TRIGGER hachage_mdp ENABLE;
 
+-- Agents
+create or replace trigger agent_immobilier
+    after insert on personnel
+    for each row
+    when (new.typePersonnel like '%agent immobilier%')
+BEGIN
+    insert into agent_info values
+    (
+        :new.idPersonnel,
+        0,
+        0.
+    );
+END;
+/
+
 -- BIEN_IMMOBILIER
 -- Date initiale
 create or replace trigger insertionImmobilier
@@ -133,6 +148,7 @@ BEGIN
     (
         nouvelID_v,
         :old.idBien,
+        :old.idPersonnel,
         :old.idUtilisateur,
         :old.loyer,
         :old.charges,
@@ -180,6 +196,7 @@ BEGIN
     (
         nouvelID_v,
         :old.idBien,
+        :old.idPersonnel,
         :old.idUtilisateur,
         :old.prixInitial,
         :old.prixCourant,
@@ -232,6 +249,145 @@ END;
 /
 show errors;
 ALTER TRIGGER insertion_historique_vente ENABLE;
+
+create or replace procedure verifier_performances
+    (idPersonnel_p agent_info.idPersonnel%type)
+is
+    temp_succes_v integer;
+    temp_benefices_v float;
+    somme_succes_v integer;
+    somme_benefices_v float;
+BEGIN
+    somme_succes_v := 0;
+    somme_benefices_v := 0.;
+
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select prixCourant * fraisAgence as benefice
+                from vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    somme_succes_v := somme_succes_v + temp_succes_v;
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select benefice
+                from historique_vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    somme_succes_v := somme_succes_v + temp_succes_v;
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select fraisAgence
+                from location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    somme_succes_v := somme_succes_v + temp_succes_v;
+    select count(*)
+        into temp_succes_v
+        from
+        (
+            select fraisAgence
+                from historique_location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    somme_succes_v := somme_succes_v + temp_succes_v;
+
+    select sum(benefice)
+        into temp_benefices_v
+        from
+        (
+            select prixCourant * fraisAgence as benefice
+                from vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    select sum(benefice)
+        into temp_benefices_v
+        from
+        (
+            select benefice
+                from historique_vente
+                where vendu = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateVente, 'YYYY'))
+        )
+    ;
+    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    select sum(fraisAgence)
+        into temp_benefices_v
+        from
+        (
+            select fraisAgence
+                from location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+    select sum(fraisAgence)
+        into temp_benefices_v
+        from
+        (
+            select fraisAgence
+                from historique_location
+                where loue = 1
+                    AND idPersonnel = idPersonnel_p
+                    AND to_number(to_char(sysdate, 'YYYY')) = to_number(to_char(dateLocation, 'YYYY'))
+        )
+    ;
+    somme_benefices_v := somme_benefices_v + temp_benefices_v;
+
+    update agent_info set
+        nombre_de_ventes = somme_succes_v,
+        benefice_total = somme_benefices_v
+    where idPersonnel = idPersonnel_p;
+END;
+/
+show errors;
+
+create or replace trigger bien_vendu
+    before insert or update on VENTE
+    for each row
+    when (new.vendu = 1)
+BEGIN
+    verifier_performances(:new.idPersonnel);
+END;
+/
+show errors;
+ALTER TRIGGER bien_vendu ENABLE;
+
+create or replace trigger bien_loue
+    before insert or update on LOCATION
+    for each row
+    when (new.loue = 1)
+BEGIN
+    verifier_performances(:new.idPersonnel);
+END;
+/
+show errors;
+ALTER TRIGGER bien_loue ENABLE;
 
 create or replace trigger visite_invalide
     before insert or update on reservation_creneau
@@ -305,5 +461,7 @@ ALTER TRIGGER visite_invalide ENABLE;
 create or replace view pourcentage_rentabilite (identifiant_bien, rentabilite, prix) as
 select idBien, ((prixCourant/prixInitial)*100), prixCourant
 from vente;
---On autorise les gens à modifier le prix et sélectionner n'importe quoi dans la vue
+--On autorise les gens à modifier le prix et sélectionner n''importe quoi dans la vue
 grant select, update(prix) on pourcentage_rentabilite to public;
+
+
