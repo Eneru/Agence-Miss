@@ -54,8 +54,11 @@ create table PERSONNEL
     typePersonnel varchar2(32) not null,
     salaire float not null,
     foreign key (idUtilisateur) references UTILISATEUR,
-    CHECK (salaire >= 0.
-        AND lower(typePersonnel) IN ('directeur','secretaire','personnel administratif','agent immobilier'))
+    CHECK
+    (
+        salaire >= 0.
+        AND lower(typePersonnel) IN ('directeur','secretaire','personnel administratif','agent immobilier')
+    )
 );
 
 create table AGENT_INFO
@@ -91,12 +94,15 @@ create table RECHERCHE
     nbPiecesMax number(3) not null,
     nomQuartier varchar2(32) not null,
     foreign key (nomQuartier) references QUARTIER,
-    CHECK (prixMin > 0.
+    CHECK
+    (
+        prixMin > 0.
         AND prixMax >= prixMin
         AND tailleMin > 0
         AND tailleMax >= tailleMin
         AND nbPiecesMin > 0
-        AND nbPiecesMax >= nbPiecesMin)
+        AND nbPiecesMax >= nbPiecesMin
+    )
 );
 
 create table RECHERCHE_CLIENT
@@ -117,6 +123,7 @@ create table BIEN_IMMOBILIER
     nbCuisines number(1) not null,
     nbGarages number(1) not null,
     nbCaves number(1) not null,
+    surface integer not null,
     tailleTerrain integer not null,
     nbEtages number(2) not null,
     nbAscenceurs number(1) not null,
@@ -127,15 +134,19 @@ create table BIEN_IMMOBILIER
     foreign key (idUtilisateur) references UTILISATEUR,
     foreign key (nomQuartier) references QUARTIER,
     foreign key (idImage) references IMAGE,
-    CHECK (nbChambres >= 0
+    CHECK
+    (
+        nbChambres >= 0
         AND nbSdB >= 0
         AND nbCuisines >= 0
         AND nbGarages >= 0
         AND nbCaves >= 0
+        AND surface > 0
         AND tailleTerrain >= 0
         AND nbEtages >= 0
         AND nbAscenceurs >= 0
-        AND lower(typeBien) IN ('maison','appartement','villa'))
+        AND lower(typeBien) IN ('maison','appartement')
+    )
 );
 
 create table RESERVATION_CRENEAU
@@ -156,67 +167,86 @@ create table LOCATION
 (
     idLocation integer primary key,
     idBien integer not null,
+    idUtilisateur integer,
     loyer float not null,
     charges float not null,
     fraisAgence float not null,
-    enLocation number(1) default 1,
+    loue number(1) default 0,
     dateLocation date default null,
     foreign key (idBien) references BIEN_IMMOBILIER,
-    CHECK (loyer > 0.
+    foreign key (idUtilisateur) references UTILISATEUR,
+    CHECK
+    (
+        loyer > 0.
         AND charges >= 0.
         AND fraisAgence >= 0.
-        AND fraisAgence <= loyer)
+        AND fraisAgence <= loyer
+    )
 );
 
 create table VENTE
 (
     idVente integer primary key,
     idBien integer not null,
+    idUtilisateur integer,
     prixInitial float not null,
     prixCourant float,
     marge float not null,
     fraisAgence float not null, -- pourcentage
-    enVente number(1) default 1,
+    vendu number(1) default 0,
     dateVente date default null,
     foreign key (idBien) references BIEN_IMMOBILIER,
-    CHECK (prixInitial >= prixCourant
+    foreign key (idUtilisateur) references UTILISATEUR,
+    CHECK
+    (
+        prixInitial >= prixCourant
         AND marge >= 0.
         AND prixCourant >= prixInitial - marge
         AND fraisAgence >= 0.03
-        AND fraisAgence <= 0.10)
+        AND fraisAgence <= 0.10
+    )
 );
 
 create table HISTORIQUE_LOCATION
 (
     idHistLocation integer primary key,
     idBien integer not null,
-    idUtilisateur integer not null,
-    idPersonnel integer not null,
+    idUtilisateur integer,
     loyer float not null,
     charges float not null,
     fraisAgence float not null,
-    dateL date not null,
+    loue number(1) not null,
+    dateLocation date,
     foreign key (idBien) references BIEN_IMMOBILIER,
     foreign key (idUtilisateur) references UTILISATEUR,
     foreign key (idPersonnel) references PERSONNEL,
-    CHECK (loyer > 0.
+    CHECK
+    (
+        loyer > 0.
         AND charges >= 0.
         AND fraisAgence >= 0.
-        AND fraisAgence <= loyer)
+        AND fraisAgence <= loyer
+    )
 );
 
 create table HISTORIQUE_VENTE
 (
     idHistVente integer primary key,
     idBien integer not null,
+    idUtilisateur integer,
     prixInitial float not null,
     prixVente float not null,
     fraisAgence float not null,
-    dateV date not null,
+    vendu number(1) not null,
+    dateVente date,
     benefice float not null,
     foreign key (idBien) references BIEN_IMMOBILIER,
-    CHECK (prixInitial >= prixVente
+    foreign key (idUtilisateur) references UTILISATEUR,
+    CHECK
+    (
+        prixInitial >= prixVente
         AND prixVente > 0.
         AND fraisAgence >= 0.03
-        AND fraisAgence <= 0.10)
+        AND fraisAgence <= 0.10
+    )
 );

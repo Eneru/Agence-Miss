@@ -1,6 +1,7 @@
 insert into historique_vente values (
     1,
     2,
+    3,
     100000,
     80000,
     0.03,
